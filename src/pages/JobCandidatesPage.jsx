@@ -1699,8 +1699,6 @@ setBulkUpdating(false);
                     ))}
                   </>
                 )}
-{console.log('XAI data:', selectedForExplain.explanation)}
-{console.log('buildSummary output:', buildSummary(selectedForExplain))}
             <div className="explanation-summary">
   {buildSummary(selectedForExplain)}
 </div>
@@ -1713,6 +1711,7 @@ setBulkUpdating(false);
           </div>
         </div>
       )}
+
 
 {/* Bulk Update Success Notification */} {bulkUpdateSuccessMessage && 
 ( <div style={{ position: 'fixed', bottom: '20px', right: '20px', padding: '12px 20px', background: '#0D9488',
