@@ -15,6 +15,73 @@ import Loader from '../components/Loader';
 
 
 export default function JobCandidatesPage() {
+// ─── Helper: extract a short label from a factor string ──
+const extractFactorLabel = (factor) => {
+  const text = factor.replace(/^✓\s*/, '').trim().toLowerCase();
+  if (text.includes('master') || text.includes('bachelor') || text.includes('degree')) return 'education';
+  if (text.includes('experience')) return 'work experience';
+  if (text.includes('eligibility') || text.includes('professional') || text.includes('subprofessional')) return 'eligibility';
+  if (text.includes('training')) return 'training';
+  return null;
+};
+
+// ─── Helper: join with natural "a, b, and c" ─────────
+const joinNatural = (items) => {
+  if (items.length === 0) return '';
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
+};
+
+// ─── Helper: extract the gap value cleanly ───────────
+const getGapValue = (factor) => {
+  const colonSplit = factor.split(':');
+  if (colonSplit.length < 2) return factor;
+
+  const label = colonSplit[0].trim().toLowerCase();
+  const rest = colonSplit[1].trim();
+
+  const ratioMatch = rest.match(/(\d+)\s*\/\s*(\d+)/);
+  if (ratioMatch) {
+    const [, current, required] = ratioMatch;
+    return `${current} ${label}, which is below the required ${required}`;
+  }
+
+  return rest;
+};
+
+// ─── Main function: build the narrative summary ──────
+const buildSummary = (applicant) => {
+  const exp = applicant.explanation || {};
+  const firstName = (applicant.applicant_name || 'The applicant').split(' ')[0];
+
+  const metFactors = exp.contributing_factors || [];
+  const reducedFactors = exp.score_reduced || [];
+  const requirementsMet = exp.requirements_met || '';
+
+  const [metCount, totalCount] = requirementsMet.split('/').map(Number);
+
+  // ── Meets everything ────────────────────────────────
+  if (reducedFactors.length === 0) {
+    return `${firstName} meets all ${totalCount} requirements and is highly suitable for this position.`;
+  }
+
+  // ── Strong candidate (75%+) ─────────────────────────
+  if (metCount >= totalCount * 0.75) {
+    const metLabels = metFactors.map(extractFactorLabel).filter(Boolean);
+    const metText = joinNatural(metLabels);
+    return `${firstName} meets the ${metText} requirements. However, the applicant currently has ${getGapValue(reducedFactors[0])}. This is a minor gap that may be addressed before placement.`;
+  }
+
+  // ── Borderline (50–74%) ─────────────────────────────
+  if (metCount >= totalCount * 0.5) {
+    return `${firstName} meets ${metCount} of ${totalCount} requirements. While the applicant satisfies key criteria, gaps exist that may affect suitability. Review the details above before deciding.`;
+  }
+
+  // ── Not suitable (<50%) ─────────────────────────────
+  return `${firstName} does not currently meet the position requirements and may not be suitable at this time.`;
+};
+
 const [showStatusConfirm, setShowStatusConfirm] = useState(false);
 const [pendingStatus, setPendingStatus] = useState(null);
 const [statusSuccessMessage, setStatusSuccessMessage] = useState('');
@@ -1596,10 +1663,11 @@ setBulkUpdating(false);
                     ))}
                   </>
                 )}
-
-                <div className="explanation-summary">
-                  {selectedForExplain.explanation.summary || selectedForExplain.explanation.recommendation}
-                </div>
+{console.log('XAI data:', selectedForExplain.explanation)}
+{console.log('buildSummary output:', buildSummary(selectedForExplain))}
+            <div className="explanation-summary">
+  {buildSummary(selectedForExplain)}
+</div>
               </div>
 
               <div className="modal-actions">
