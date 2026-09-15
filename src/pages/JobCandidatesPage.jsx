@@ -1705,7 +1705,28 @@ setBulkUpdating(false);
               </div>
 
               <div className="modal-actions">
-                <button className="close-btn" onClick={() => setShowExplainModal(false)}>Close</button>
+             <button 
+  className="close-btn" 
+  onClick={() => setShowExplainModal(false)}
+  style={{
+    background: '#D3F0F9',
+    color: '#1a3a5c',
+    border: 'none',
+    borderRadius: '6px',
+    padding: '8px 24px',
+    cursor: 'pointer',
+    fontWeight: '500',
+    transition: 'background 0.2s ease'
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.background = '#b8e4f0';
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.background = '#D3F0F9';
+  }}
+>
+  Close
+</button>
               </div>
             </div>
           </div>
@@ -1902,7 +1923,28 @@ setBulkUpdating(false);
               </div>
 
               <div className="modal-actions">
-                <button className="close-btn" onClick={() => setShowDetailsModal(false)}>Close</button>
+                <button 
+  className="close-btn" 
+  onClick={() => setShowDetailsModal(false)}
+  style={{
+    background: '#D3F0F9',
+    color: '#1a3a5c',
+    border: 'none',
+    borderRadius: '6px',
+    padding: '8px 24px',
+    cursor: 'pointer',
+    fontWeight: '500',
+    transition: 'background 0.2s ease'
+  }}
+  onMouseEnter={(e) => {
+    e.currentTarget.style.background = '#b8e4f0';
+  }}
+  onMouseLeave={(e) => {
+    e.currentTarget.style.background = '#D3F0F9';
+  }}
+>
+  Close
+</button>
                 {selectedApplication.status !== 'INTERVIEW_SCHEDULED' && (
                   <button 
       className="schedule-btn" 
