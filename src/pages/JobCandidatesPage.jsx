@@ -41,10 +41,46 @@ const getGapValue = (factor) => {
   const label = colonSplit[0].trim().toLowerCase();
   const rest = colonSplit[1].trim();
 
+  // ── Numeric gaps (Training Hours, Experience) ───────
   const ratioMatch = rest.match(/(\d+)\s*\/\s*(\d+)/);
   if (ratioMatch) {
     const [, current, required] = ratioMatch;
-    return `${current} ${label}, which is below the required ${required}`;
+    const currentNum = parseInt(current);
+    const unitMatch = rest.match(/\/\s*\d+\s*(\w+)/);
+    const unit = unitMatch ? unitMatch[1] : '';
+
+    if (currentNum === 0) {
+      if (label === 'experience') {
+        return `no relevant work experience yet, falling short of the required ${required} ${unit}`.trim();
+      }
+      return `no relevant ${label} yet, falling short of the required ${required} ${unit}`.trim();
+    }
+
+    if (label === 'experience') {
+      return `${current} ${unit} of experience, which falls short of the required ${required} ${unit}`.trim();
+    }
+
+    return `${current} ${label}, which falls short of the required ${required} ${unit}`.trim();
+  }
+
+  // ── Education gap (non-numeric) ─────────────────────
+  if (label === 'education') {
+    const needsMatch = rest.match(/^(.+?)\s*\(needs\s+(.+?)\)$/);
+    if (needsMatch) {
+      const [, actual, required] = needsMatch;
+      return `an education level of ${actual.trim()}, which does not meet the required ${required.trim()}`;
+    }
+    return `an education level that does not meet the requirement (${rest})`;
+  }
+
+  // ── Eligibility gap (non-numeric) ───────────────────
+  if (label === 'eligibility') {
+    const needsMatch = rest.match(/^(.+?)\s*\(needs\s+(.+?)\)$/);
+    if (needsMatch) {
+      const [, actual, required] = needsMatch;
+      return `${actual.trim()} eligibility, which does not meet the required ${required.trim()}`;
+    }
+    return `eligibility that does not meet the requirement (${rest})`;
   }
 
   return rest;
@@ -63,23 +99,23 @@ const buildSummary = (applicant) => {
 
   // ── Meets everything ────────────────────────────────
   if (reducedFactors.length === 0) {
-    return `${firstName} meets all ${totalCount} requirements and is highly suitable for this position.`;
+    return `${firstName} meets all ${totalCount} requirements. An excellent fit for this position.`;
   }
 
   // ── Strong candidate (75%+) ─────────────────────────
   if (metCount >= totalCount * 0.75) {
     const metLabels = metFactors.map(extractFactorLabel).filter(Boolean);
     const metText = joinNatural(metLabels);
-    return `${firstName} meets the ${metText} requirements. However, the applicant currently has ${getGapValue(reducedFactors[0])}. This is a minor gap that may be addressed before placement.`;
+    return `${firstName} meets the ${metText} requirements. However, the applicant currently has ${getGapValue(reducedFactors[0])}. A strong candidate with a minor gap that may be addressed before placement.`;
   }
 
   // ── Borderline (50–74%) ─────────────────────────────
   if (metCount >= totalCount * 0.5) {
-    return `${firstName} meets ${metCount} of ${totalCount} requirements. While the applicant satisfies key criteria, gaps exist that may affect suitability. Review the details above before deciding.`;
+    return `${firstName} meets ${metCount} of ${totalCount} requirements. The applicant satisfies key criteria, but gaps exist that may affect suitability. Review the details above before deciding.`;
   }
 
   // ── Not suitable (<50%) ─────────────────────────────
-  return `${firstName} does not currently meet the position requirements and may not be suitable at this time.`;
+  return `${firstName} does not currently meet the position requirements. Not recommended at this time.`;
 };
 
 const [showStatusConfirm, setShowStatusConfirm] = useState(false);
